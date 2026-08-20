@@ -1,8 +1,6 @@
 # Professional Tasks Context Range Estimator
 
-A project-specific fork of the Spidey Context Budget Estimator for **Professional Tasks / Professional Duck**.
-
-The key difference is that Professional Tasks has a **minimum reading-depth requirement**, not just an upper context-risk limit. The supplied task-writing guide states that a prompt must need **at least 10 files and 256k source tokens** from the environment. The separate Environment Creation guide also expects environments to be deep enough to support 256k+ tasks and sets a stronger environment-design target of **20 files or at least 50% of the environment** per future prompt.
+Professional Tasks context estimator for checking required file count, source-token depth, and maximum context load.
 
 ## Default thresholds
 
