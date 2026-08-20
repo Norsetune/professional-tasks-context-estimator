@@ -1,6 +1,6 @@
 # Professional Tasks Context Range Estimator
 
-Professional Tasks context estimator for checking required file count, source-token depth, and maximum context load.
+Professional Tasks estimator for checking file count, source depth, and context load.
 
 ## Default thresholds
 
