@@ -407,7 +407,7 @@ st.markdown(
         margin-top: 2rem;
         padding-bottom: 1rem;
     ">
-        Built by Kenneth Pedersen · 2026
+        Kenneth Pedersen · 2026
     </div>
     """,
     unsafe_allow_html=True,
