@@ -896,7 +896,7 @@ st.markdown(
 
 **Part 1 · Duck Environments — Environment Creation**  
 Checks the **source environment** before downstream tasks are written. Environment size follows
-the assigned file-count band, needs **3+ formats**, and uses **256k as the required depth floor**.
+the assigned file-count band, needs **3+ formats**, and uses **256k as the baseline** required depth floor, particularly for the smallest environment size band.
 It also shows **1M as an advisory density target**, while intentionally applying **no upper token ceiling**.
 
 **Part 2 · Professional Tasks — Prompt + Rubric**  
