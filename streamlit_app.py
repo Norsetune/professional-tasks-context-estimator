@@ -43,6 +43,7 @@ st.caption(
 
 WORKFLOW_ENV = "Part 1 · Duck Environments — Environment Creation"
 WORKFLOW_TASK = "Part 2 · Professional Tasks — Prompt + Rubric"
+ENVIRONMENT_MIN_SOURCE_TOKENS = 800_000
 
 workflow = st.radio(
     "Which part of the program are you checking?",
@@ -65,8 +66,8 @@ else:
     st.info(
         "### Part 1 · Duck Environments — Environment Creation\n"
         "You are checking the **source environment itself**, before prompts/rubrics are created from it. "
-        "Environment size follows the assigned file-count band and should be dense enough to support "
-        "**256k+ token tasks**. **No upper token limit is applied in this mode**, so dense or massive "
+        "Environment size follows the assigned file-count band and must contain at least "
+        "**800k source tokens**. **No upper token limit is applied in this mode**, so dense or massive "
         "environments may exceed 1,000,000 tokens."
     )
 
@@ -884,15 +885,14 @@ more material than any single downstream task needs to process.
 
         with e2:
             env_depth_tokens = st.number_input(
-                "Baseline environment depth",
-                min_value=1_000,
-                value=256_000,
+                "Minimum environment depth",
+                min_value=ENVIRONMENT_MIN_SOURCE_TOKENS,
+                value=ENVIRONMENT_MIN_SOURCE_TOKENS,
                 step=10_000,
                 help=(
-                    "256k is used here as a baseline depth floor, particularly for the "
-                    "smallest environment size band. Larger environments are generally "
-                    "expected to be denser. The separate 1M figure is an advisory density "
-                    "target, not a pass/fail requirement."
+                    "Environment Creation now requires at least 800,000 source tokens. "
+                    "The separate 1M figure remains an advisory density target, "
+                    "not an upper limit."
                 ),
             )
 
@@ -914,11 +914,10 @@ more material than any single downstream task needs to process.
     )
 
     st.info(
-        "**Environment density guidance:** 256k is used as the **baseline depth floor**, "
-        "particularly for the smallest environment size band. Larger environments are generally "
-        "expected to be denser. **1M+ is shown separately as an advisory density target only — "
-        "not a pass/fail requirement and not an upper limit.** The app does not invent higher "
-        "token minima for the larger file-count bands."
+        "**Environment density guidance:** **800k source tokens is the minimum depth requirement** "
+        "for Environment Creation. **1M+ is shown separately as an advisory density target only — "
+        "not an additional pass/fail requirement and not an upper limit.** The same 800k minimum "
+        "applies across the environment size bands."
     )
 
     env_upload_generation = st.session_state.get("env_upload_generation", 0)
@@ -1155,14 +1154,14 @@ more material than any single downstream task needs to process.
             if file_band_met and depth_met and formats_met:
                 st.success(
                     "BASIC ENVIRONMENT CHECKS MET — the selected file-count band, "
-                    "256k baseline depth floor, and format-diversity check are satisfied."
+                    "800k minimum depth requirement, and format-diversity check are satisfied."
                 )
             else:
                 missing = []
                 if not file_band_met:
                     missing.append("assigned file-count band")
                 if not depth_met:
-                    missing.append("256k baseline depth floor")
+                    missing.append("800k minimum depth requirement")
                 if not formats_met:
                     missing.append("3-format minimum")
                 st.warning(
@@ -1231,6 +1230,8 @@ more material than any single downstream task needs to process.
                     "file_count": total_files,
                     "file_band_met": file_band_met,
                     "source_context_tokens": total_source,
+                    "minimum_environment_depth_tokens": int(env_depth_tokens),
+                    "minimum_environment_depth_met": depth_met,
                     "baseline_depth_floor_tokens": int(env_depth_tokens),
                     "baseline_depth_floor_met": depth_met,
                     "advisory_density_target_tokens": advisory_density_target,
@@ -1270,7 +1271,7 @@ st.markdown(
 ### Two workflows, two purposes
 
 **Part 1 · Duck Environments — Environment Creation**  
-Checks the **source environment** before downstream tasks are written. Environment size follows the assigned file-count band, needs **3+ formats**, and uses **256k as the baseline** required depth floor, particularly for the smallest environment size band. It also shows **1M as an advisory density target**, while intentionally applying **no upper token ceiling**.
+Checks the **source environment** before downstream tasks are written. Environment size follows the assigned file-count band, needs **3+ formats**, and requires at least **800k source tokens**. It also shows **1M as an advisory density target**, while intentionally applying **no upper token ceiling**.
 
 **Part 2 · Professional Tasks — Prompt + Rubric**  
 Checks the context a model may need to process for **one task**. Use the required-file subset,
@@ -1285,7 +1286,7 @@ the **10-file + 256k minimum**, and the editable **1M tasking ceiling/warning**.
 )
 
 st.caption(
-    "Professional Tasks estimator v9.1 · stability + diagnostics · forked from the original Spidey Context Budget Estimator."
+    "Professional Tasks estimator v9.2 · 800k environment minimum · stability + diagnostics · forked from the original Spidey Context Budget Estimator."
 )
 
 st.markdown(
