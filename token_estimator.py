@@ -159,6 +159,22 @@ def _iter_bounded_text(text: str, limit: int = TOKEN_CHUNK_CHARACTERS):
         yield text[start : start + limit]
 
 
+def _encode_ordinary_token_count(encoder, text: str) -> int:
+    """Count source-document text as ordinary text, even when it resembles model special tokens.
+
+    Source files can legitimately contain literal strings such as ``<|endoftext|>``. Those
+    strings are document content, not tokenizer control instructions, so the estimator must not
+    reject them as disallowed special tokens. ``encode_ordinary`` gives the desired behavior;
+    the fallback keeps compatibility with encoder implementations that expose only ``encode``.
+    """
+    if not text:
+        return 0
+    encode_ordinary = getattr(encoder, "encode_ordinary", None)
+    if callable(encode_ordinary):
+        return len(encode_ordinary(text))
+    return len(encoder.encode(text, disallowed_special=()))
+
+
 @dataclass
 class TextMetrics:
     characters: int
@@ -183,7 +199,7 @@ class _TextMetricsAccumulator:
         if self._encoder is None or not self._token_buffer:
             return
         text = "".join(self._token_buffer)
-        self.text_tokens += len(self._encoder.encode(text))
+        self.text_tokens += _encode_ordinary_token_count(self._encoder, text)
         self._token_buffer.clear()
         self._token_buffer_characters = 0
 
@@ -196,7 +212,7 @@ class _TextMetricsAccumulator:
         if len(piece) > TOKEN_CHUNK_CHARACTERS:
             self._flush_token_buffer()
             for bounded in _iter_bounded_text(piece):
-                self.text_tokens += len(self._encoder.encode(bounded))
+                self.text_tokens += _encode_ordinary_token_count(self._encoder, bounded)
             return
 
         if (
@@ -261,7 +277,7 @@ def estimate_text_tokens(text: str) -> int:
     encoder = _get_token_encoder()
     if encoder is not None:
         # Bound each encode call to avoid allocating one enormous token list.
-        return sum(len(encoder.encode(piece)) for piece in _iter_bounded_text(text))
+        return sum(_encode_ordinary_token_count(encoder, piece) for piece in _iter_bounded_text(text))
 
     characters = len(text)
     words = len(re.findall(r"\S+", text))
